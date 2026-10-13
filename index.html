@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b4ea2"><meta name="format-detection" content="telephone=no">
+<title>Billing App</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f2f5fa;--card:#fff;--tx:#14233c;--mu:#5d6b82;--pr:#0b4ea2;--pt:#fff;--bd:#d5ddea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1522;--card:#17213a;--tx:#e6ecf7;--mu:#94a3bd;--pr:#4b8fe8;--pt:#06101f;--bd:#2a3858}}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;font:14px/1.45 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;padding:16px}
+.box{background:var(--card);padding:28px;border-radius:10px;width:100%;max-width:340px;border:1px solid var(--bd)}
+#app{display:none;height:100%}#side{width:230px;background:var(--pr);color:var(--pt);padding:14px;overflow:auto;flex:none}
+#app.on{display:flex}#side h2{margin:0 0 2px;font-size:17px}#side .u{font-size:13px;opacity:.85;margin-bottom:12px}
+#side button.nav{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;padding:8px 10px;border-radius:6px;cursor:pointer;font:inherit}
+#side button.nav:hover,#side button.nav.a{background:rgba(255,255,255,.18)}#side small{display:block;margin:12px 10px 4px;opacity:.7}
+#main{flex:1;padding:18px;overflow:auto;min-width:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:16px}
+h3{margin:0 0 12px}label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font:inherit}
+input[type=checkbox]{width:auto}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+button.b{background:var(--pr);color:var(--pt);border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font:inherit;margin:2px 4px 2px 0}
+button.b.s{background:none;color:var(--pr);border:1px solid var(--pr)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--bd);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--pr);color:var(--pt)}
+td input{min-width:70px}.chk label{display:inline-flex;gap:6px;align-items:center;color:var(--tx);font-size:14px;margin:4px 14px 4px 0}
+#pa{display:none}
+@media print{body>*:not(#pa){display:none!important}#pa{display:block!important;color:#000;background:#fff}}
+#bar{display:none;align-items:center;gap:10px;background:var(--pr);color:var(--pt);padding:6px 12px;font-weight:600}#bar button.b{background:rgba(255,255,255,.2);color:inherit}
+@media(max-width:700px){#app.on{flex-direction:column}#side{display:none;width:100%;max-height:70%}#side.open{display:block}#bar{display:flex}input,select,textarea{font-size:16px}button.b{padding:10px 14px}#side button.nav{padding:12px 10px}#main{padding:12px}}
+.inv{font-family:"Segoe UI",Arial,sans-serif;font-size:13px;color:#0d2a55;max-width:780px;margin:auto;padding:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inv .top{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0b5fc9;padding-bottom:10px;gap:12px}.inv .nm{font-size:30px;font-weight:800;color:#0b5fc9;line-height:1.1}
+.inv .ttl{display:flex;justify-content:space-between;align-items:center;margin:14px 0;gap:12px}.inv h1{margin:0;font-size:24px;color:#0a2a5e}.inv h3{margin:16px 0 6px;color:#0a2a5e;font-size:14px}
+.inv .ib{background:#0b5fc9;color:#fff;border-radius:10px;padding:10px 16px;line-height:1.7;white-space:nowrap}
+.inv .cu{background:#eef5fd;border-radius:10px;padding:12px 16px;width:64%;margin-bottom:14px;line-height:1.7}.inv .cu h4{margin:0 0 4px;color:#0b5fc9;font-size:15px}
+.inv table{width:100%;border-collapse:collapse}.inv th{background:#0b5fc9;color:#fff;padding:8px 9px;text-align:left;border:0}.inv td{border:0;border-bottom:1px solid #c9dcf3;padding:8px 9px}
+.inv .r{text-align:right!important}.inv .c{text-align:center!important}.inv .sub{color:#4a6a9a;font-size:12px}
+.inv .tb{width:48%;margin:14px 0 0 auto;background:#eef5fd;border-radius:10px;overflow:hidden}.inv .tb div{display:flex;justify-content:space-between;padding:7px 14px;border-bottom:1px solid #cfe0f5}
+.inv .tb .gt{background:#0b5fc9;color:#fff;font-size:17px;font-weight:700;border:0;padding:10px 14px}
+.inv .ft{display:flex;justify-content:space-around;align-items:center;text-align:center;border-top:1px solid #0b5fc9;margin-top:18px;padding-top:12px;font-size:12px;gap:8px}
+.inv .bar{background:#0a4a99;color:#fff;text-align:center;border-radius:8px;padding:8px;margin-top:12px}
+.inv .tiles{display:flex;gap:8px;margin-top:12px}.inv .tile{flex:1;border:1px solid #c9dcf3;border-radius:6px;padding:8px}.inv .tile b{display:block;font-size:16px;margin-top:2px}
+.inv .two{display:flex;gap:14px}.inv .two>div{flex:1}.inv .tot td{font-weight:700;background:#eef5fd}
+.inv .sg{display:flex;justify-content:space-between;margin-top:46px;gap:20px}.inv .sg span{border-top:1px solid #0b5fc9;flex:1;text-align:center;padding-top:4px;font-size:12px}
+.inv.v2{padding:0;max-width:800px;background:#fff;overflow:hidden;color:#0b2a5e}
+.v2 .hd2{display:flex;justify-content:space-between;align-items:stretch;background:linear-gradient(90deg,#fff,#eef5fd)}.v2 .hl{display:flex;align-items:center;gap:14px;padding:18px 20px}
+.v2 .hl img{max-height:78px;max-width:110px;object-fit:contain}.v2 .nm2{font-size:36px;font-weight:800;color:#0b2a5e;line-height:1}.v2 .nm2 b{color:#1d6fe0}.v2 .tg{font-size:16px;margin-top:5px}
+.v2 .hr{background:#1d6fe0;color:#fff;padding:16px 22px;min-width:240px;line-height:1.6;display:flex;flex-direction:column;justify-content:center;border-bottom-left-radius:70px;padding-left:44px}
+.v2 .bn{background:#0d3b7a;color:#fff;text-align:center;font-size:30px;font-weight:800;padding:12px;letter-spacing:1px}
+.v2 .ir{display:flex;padding:14px 20px}.v2 .ir>div{flex:1;display:flex;gap:10px;align-items:center;border-right:1px solid #9bb8de;padding:0 12px}.v2 .ir>div:last-child{border:0}.v2 .ir small{display:block;font-size:13px;color:#0d3b7a}.v2 .ir b{font-size:16px}
+.v2 .box{margin:6px 20px;border:1px solid #bcd7f5;background:#f3f8fe;border-radius:8px;padding:12px 16px}.v2 .box h4{margin:0 0 8px;font-size:20px;color:#0d3b7a;display:flex;align-items:center;gap:8px}
+.v2 .kv{display:flex;padding:3px 0;font-size:15px}.v2 .kv span:first-child{width:130px;font-weight:600;color:#0d3b7a}.v2 .kv span:nth-child(2){width:24px}
+.v2 .pi{margin:14px 20px 8px;background:#0d3b7a;color:#fff;border-radius:8px;padding:9px 16px;font-size:20px;font-weight:700;display:flex;gap:10px;align-items:center}
+.v2 table.pt{margin:0 20px;width:calc(100% - 40px);border:1px solid #3b7bd8;border-collapse:collapse}.v2 .pt th{background:#dcebfb;color:#0d3b7a;border:1px solid #3b7bd8;padding:10px;text-align:center}.v2 .pt td{border:1px solid #3b7bd8;padding:10px;font-size:14px}
+.v2 .t2{margin:14px 20px 0 auto;width:46%;border:1px solid #bcd7f5;border-radius:6px;overflow:hidden;background:#f3f8fe}.v2 .t2 div{display:flex;justify-content:space-between;padding:9px 14px;font-weight:600;color:#0d3b7a;border-bottom:1px solid #d5e5f8}.v2 .t2 .gt{background:#0d3b7a;color:#fff;font-size:19px;font-weight:700;border:0}
+.v2 .aw{margin:14px 20px;border:1px solid #bcd7f5;background:#f3f8fe;border-radius:8px;padding:10px 16px;display:flex;gap:12px;align-items:center}.v2 .aw b{display:block;color:#0d3b7a}.v2 .aw .w{font-size:19px;font-weight:700}
+.v2 .ic{width:38px;height:38px;border-radius:50%;background:#0d3b7a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.v2 .fs{display:flex;padding:8px 20px 14px}.v2 .fs>div{flex:1;display:flex;gap:10px;align-items:center;border-right:1px solid #9bb8de;padding:0 12px;color:#0d3b7a;font-weight:600}.v2 .fs>div:last-child{border:0}
+.v2 .ftr{background:#0d3b7a;color:#fff;text-align:center;padding:28px 10px 16px;border-radius:50% 50% 0 0/36px 36px 0 0}.v2 .ftr i{font-family:"Segoe Script","Brush Script MT",cursive;font-size:26px}
+</style></head><body>
+<div id="login"><div class="box"><h2 id="lc" style="margin-top:0;text-align:center">Sign in</h2><img id="ll" style="max-width:100%;display:none;margin:0 auto 10px">
+<label>Username</label><input id="lu" autocomplete="username"><label style="margin-top:10px">Password</label><input id="lp" type="password" autocomplete="current-password">
+<p id="le" style="color:#c0392b;min-height:18px;margin:8px 0"></p><button class="b" style="width:100%" onclick="login()">Login</button></div></div>
+<div id="app"><div id="bar"><button class="b" onclick="$('side').classList.toggle('open')">&#9776; Menu</button><span id="bt"></span></div><div id="side"></div><div id="main"></div></div><div id="pa"></div>
+<script>
+const FORMS={items:"Item Master",sales:"Sales",report:"Sales Report",dash:"Sales Dashboard",users:"Users",access:"Form Access",company:"Company Settings",excel:"Excel Storage",imp:"Import from Excel",reset:"Reset Data"};
+const ADMIN=["users","access","company","excel","imp","reset"],REPORTS=["report","dash"];
+let D={users:[{u:"admin",p:"a",role:"admin",on:true}],access:{},items:[],sales:[],co:{name:"Mobile World",addr:"",phone:"",gst:"",email:"",logo:"",bg:""},seq:1};
+let LOCAL=null;try{const s=localStorage.getItem("bill_d");if(s){LOCAL=JSON.parse(s);D=Object.assign(D,LOCAL)}}catch(e){}
+norm();let me=null,fh=null,cur="";
+const $=i=>document.getElementById(i),E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),L=s=>String(s).trim().toLowerCase();
+const J=JSON.stringify;let DB=null,syncMsg="Connecting...";const HID=Math.random().toString(36).slice(2);let last={},q=Promise.resolve();
+function setSync(m){syncMsg=m;const e=$("sy");if(e)e.textContent=m}
+function parts(){const co={...D.co},lg=co.logo||"",bg=co.bg||"";delete co.logo;delete co.bg;const p={"app/users":{list:D.users},"app/access":{map:D.access},"app/items":{list:D.items},"app/co":co,"app/logo":{d:lg},"app/bg":{d:bg},"app/resetlog":{list:D.resetlog||[]}};D.sales.forEach(x=>p["sales/"+x.no]=x);return p}
+async function doSave(){try{localStorage.setItem("bill_d",J(D))}catch(e){}
+if(DB){const p=parts();let bad="";for(const k of Object.keys(last))if(k.startsWith("sales/")&&!(k in p)){try{await DB.doc(k).delete();delete last[k]}catch(e){bad="Could not delete from the shared database ("+(e.code||"error")+")."}}for(const k in p){const t=J(p[k]);if(last[k]===t)continue;if(t.length>250000){bad="An image is too large to share. Upload a smaller logo or background in Company Settings.";continue}
+try{await DB.doc(k).set(p[k]);last[k]=t}catch(e){bad="Could not save to the shared database ("+(e.code||"error")+"). You may have view-only access. Changes are kept on this device only."}}
+if(bad){setSync("Not synced");alert(bad)}else setSync("Synced on all devices")}
+await sync()}
+function save(){return q=q.then(doSave).catch(()=>{})}
+function loc(){const mx=Math.max(0,...D.sales.map(x=>parseInt(String(x.no).slice(3))||0));const n=Math.max(D.seq,mx+1);D.seq=n+1;return n}
+async function getNo(){if(!DB)return loc();const ref=DB.doc("app/seq");
+for(let t=0;t<10;t++){try{const r=await ref.acquire({holder:HID,ttlMs:5000});if(r.acquired){const sn=await ref.get(),mx=Math.max(0,...D.sales.map(x=>parseInt(String(x.no).slice(3))||0)),n=Math.max(sn.exists?(sn.data().n||1):1,mx+1);await ref.set({n:n+1});D.seq=n+1;return n}}catch(e){break}await new Promise(r=>setTimeout(r,400+Math.random()*400))}
+return loc()}
+function dlOpts(){return D.items.filter(x=>x.on).map(x=>`<option value="${E(lb(x))}">`).join("")}
+function chg(){clearTimeout(chg.t);chg.t=setTimeout(()=>{brand();if(!me)return;menu();document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("a",n.dataset.k==cur));
+if(cur=="report"||cur=="dash"){go(cur);return}if(["items","users","sales"].includes(cur)){const t=document.createElement("div");t.innerHTML=R[cur]();const n=t.querySelectorAll(".card"),o=document.querySelectorAll("#main .card");if(n.length&&n.length==o.length)o[o.length-1].replaceWith(n[n.length-1]);const d=$("dl");if(d)d.innerHTML=dlOpts()}},150)}
+let xs="";
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open("bill_fh",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+async function idbSet(k,v){const d=await idb();return new Promise((ok,no)=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+async function idbGet(k){const d=await idb();return new Promise((ok,no)=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+const fhReady=(async()=>{try{fh=(await idbGet("excel"))||null}catch(e){}})();
+async function perm(ask){if(!fh)return false;try{const o={mode:"readwrite"};let p=await fh.queryPermission(o);if(p!="granted"&&ask)p=await fh.requestPermission(o);return p=="granted"}catch(e){return false}}
+async function sync(){if(!fh)return;try{if(!await perm(false)){xs="needs permission: press Allow access here, or log in again";return}const w=await fh.createWritable();await w.write(wb());await w.close();xs="last saved "+new Date().toLocaleTimeString()}catch(e){xs="could not write: "+e.message}}
+function norm(){D.items.forEach(x=>{if(x.rate==null)x.rate=+x.price||0;if(x.mrp==null)x.mrp=+x.price||0})}
+const rateOf=x=>x.rate!=null?x.rate:(D.items.find(i=>L(i.name)==L(x.item)&&L(i.model||"")==L(x.model||""))||{}).rate||0;
+function det(r){return r.model||r.det||""}
+function ymd(s){if(s.ymd)return s.ymd;const p=String(s.date||"").split(/[\/\-.]/);return p.length==3&&p[2].length==4?p[2]+"-"+p[1].padStart(2,"0")+"-"+p[0].padStart(2,"0"):""}
+const fd=y=>y?y.split("-").reverse().join("/"):"";
+let rf=new Date().toLocaleDateString("en-CA"),rt=rf;
+function fs(){return D.sales.filter(s=>{const d=ymd(s);return(!rf||d>=rf)&&(!rt||d<=rt)})}
+const mgn=S=>S.reduce((a,s)=>a+s.rows.reduce((b,x)=>b+((x.price||0)-rateOf(x))*(x.qty||1),0)-(+s.disc||0),0);
+function rep(){const r=[];fs().forEach(s=>s.rows.forEach(x=>{const rc=rateOf(x);r.push({"Invoice No":s.no,"Sales Date":s.date,Item:x.item,Details:det(x),Person:s.person,Mobile:s.mobile,Address:s.addr,Payment:s.pay||"Cash",Rate:rc,MRP:x.price,Qty:x.qty,Total:x.price*x.qty,Margin:x.price-rc})}));return r}
+function wb(){const b=XLSX.utils.book_new(),A=(n,r)=>XLSX.utils.book_append_sheet(b,XLSX.utils.json_to_sheet(r.length?r:[{}]),n);
+A("Users",D.users.map(u=>({Username:u.u,Password:u.p,Role:u.role,Active:u.on?"Yes":"No"})));
+A("Items",D.items.map(i=>({Name:i.name,Model:i.model,Rate:i.rate,MRP:i.mrp,Active:i.on?"Active":"Inactive"})));
+A("Access",Object.entries(D.access).map(([u,f])=>({Username:u,Forms:f.join(",")})));
+const sr=[];D.sales.forEach(s=>s.rows.forEach(x=>sr.push({"Invoice No":s.no,Date:s.date,Time:s.time,Person:s.person,Mobile:s.mobile,Address:s.addr,Payment:s.pay||"",Discount:s.disc||0,Item:x.item,Model:x.model||"",Qty:x.qty,MRP:x.price,Rate:rateOf(x),Total:x.price*x.qty})));A("Sales",sr);
+A("Company",[{Name:D.co.name,Address:D.co.addr,Phone:D.co.phone,GST:D.co.gst,Email:D.co.email}]);return XLSX.write(b,{bookType:"xlsx",type:"array"})}
+async function login(){$("le").textContent="";await fhReady;if(fh&&await perm(true))sync();await ready;if(DB&&!window._w){await new Promise(r=>setTimeout(r,1200));window._w=1}const u=L($("lu").value),p=L($("lp").value),f=D.users.find(x=>L(x.u)==u&&L(x.p)==p&&x.on);
+if(!f){$("le").textContent="Wrong username or password";return}me=f;$("login").style.display="none";$("app").classList.add("on");menu();go(allowed()[0]||"")}
+function allowed(){return me.role=="admin"?Object.keys(FORMS):(D.access[me.u]||[]).filter(f=>FORMS[f])}
+function menu(){$("bt").textContent=D.co.name||"";const a=allowed(),b=k=>`<button class="nav" data-k="${k}" onclick="go('${k}')">${FORMS[k]}</button>`,fm=a.filter(k=>!ADMIN.includes(k)&&!REPORTS.includes(k)),rp=a.filter(k=>REPORTS.includes(k)),ad=a.filter(k=>ADMIN.includes(k));
+$("side").innerHTML=`<h2 style="display:flex;align-items:center;gap:8px">${D.co.logo?`<img src="${D.co.logo}" alt="" style="height:36px;max-width:56px;object-fit:contain;background:#fff;border-radius:4px;padding:2px">`:""}<span>${E(D.co.name)}</span></h2><div class="u">User: ${E(me.u)}</div><small>Forms</small>${fm.map(b).join("")}${rp.length?"<small>Reports</small>"+rp.map(b).join(""):""}${ad.length?"<small>Admin</small>"+ad.map(b).join(""):""}<button class="nav" style="margin-top:14px" onclick="location.reload()">Logout</button>`}
+function go(k){cur=k;if(k!="sales"){sbShow=false;sbQ=sbD=""}pkClose();$("side").classList.remove("open");document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("a",n.dataset.k==k));$("main").innerHTML=k?R[k]():"<p>No forms assigned. Ask the admin for access.</p>";if(k&&I[k])I[k]()}
+const v=i=>$(i).value;
+const R={},I={};
+// ---------- Item master
+let ei=-1;
+R.items=()=>`<div class="card"><h3>Item Master</h3><div class="g"><div><label>Item name</label><input id="in"></div><div><label>Item model</label><input id="im"></div><div><label>Rate</label><input id="ir" type="number" inputmode="decimal"></div><div><label>MRP</label><input id="ip" type="number" inputmode="decimal"></div><div><label>Status</label><select id="ia"><option value="1">Active</option><option value="0">Inactive</option></select></div></div>
+<button class="b" onclick="itSave()">Save</button><button class="b s" onclick="itClear()">Clear</button></div><div class="card tw"><table><tr><th>Name</th><th>Model</th><th>Rate</th><th>MRP</th><th>Status</th><th></th></tr>${D.items.map((x,i)=>`<tr><td>${E(x.name)}</td><td>${E(x.model)}</td><td>${m(x.rate)}</td><td>${m(x.mrp)}</td><td>${x.on?"Active":"Inactive"}</td><td><button class="b s" onclick="itEdit(${i})">Update</button></td></tr>`).join("")}</table></div>`;
+async function itSave(){if(!v("in").trim()){alert("Enter item name");return}const o={name:v("in"),model:v("im"),rate:+v("ir")||0,mrp:+v("ip")||0,on:v("ia")=="1"};ei<0?D.items.push(o):D.items[ei]=o;ei=-1;await save();go("items")}
+function itEdit(i){const x=D.items[i];ei=i;[["in",x.name],["im",x.model],["ir",x.rate],["ip",x.mrp],["ia",x.on?1:0]].forEach(([a,b])=>$(a).value=b);scrollTo(0,0)}
+function itClear(){ei=-1;document.querySelectorAll("#main .card:first-child input").forEach(i=>i.value="");$("ia").value="1"}
+// ---------- Users
+let eu=-1;
+R.users=()=>`<div class="card"><h3>Create / Update User</h3><div class="g"><div><label>Username</label><input id="uu"></div><div><label>Password</label><input id="up"></div><div><label>Role</label><select id="ur"><option>user</option><option>admin</option></select></div><div><label>Status</label><select id="ua"><option value="1">Active</option><option value="0">Inactive</option></select></div></div>
+<button class="b" onclick="usSave()">Save</button><button class="b s" onclick="usClear()">Clear</button></div><div class="card tw"><table><tr><th>Username</th><th>Role</th><th>Status</th><th></th></tr>${D.users.map((x,i)=>`<tr><td>${E(x.u)}</td><td>${x.role}</td><td>${x.on?"Active":"Inactive"}</td><td><button class="b s" onclick="usEdit(${i})">Update</button></td></tr>`).join("")}</table></div>`;
+async function usSave(){const u=v("uu").trim();if(!u||!v("up")){alert("Enter username and password");return}if(D.users.some((x,i)=>L(x.u)==L(u)&&i!=eu)){alert("Username already exists");return}
+const o={u,p:v("up"),role:v("ur"),on:v("ua")=="1"};if(eu==0){o.role="admin";o.on=true}eu<0?D.users.push(o):D.users[eu]=o;eu=-1;await save();go("users")}
+function usEdit(i){const x=D.users[i];eu=i;$("uu").value=x.u;$("up").value=x.p;$("ur").value=x.role;$("ua").value=x.on?1:0}
+function usClear(){eu=-1;$("uu").value=$("up").value="";$("ur").value="user";$("ua").value="1"}
+// ---------- Form access
+R.access=()=>`<div class="card"><h3>Form Access</h3><div class="g"><div><label>Username</label><select id="au" onchange="acShow()"><option value="">Select user</option>${D.users.filter(x=>x.role!="admin").map(x=>`<option>${E(x.u)}</option>`).join("")}</select></div></div><div class="chk">${Object.keys(FORMS).map(k=>`<label><input type="checkbox" class="ac" value="${k}">${FORMS[k]}</label>`).join("")}</div><p style="color:var(--mu)">Tick every form or report this user may open. The admin always sees everything.</p><button class="b" onclick="acSave()">Save access</button><button class="b s" onclick="acClear()">Clear</button></div>`;
+function acShow(){const a=D.access[v("au")]||[];document.querySelectorAll(".ac").forEach(c=>c.checked=a.includes(c.value))}
+async function acSave(){if(!v("au")){alert("Select a user");return}D.access[v("au")]=[...document.querySelectorAll(".ac:checked")].map(c=>c.value);await save();alert("Access saved")}
+function acClear(){$("au").value="";document.querySelectorAll(".ac").forEach(c=>c.checked=false)}
+// ---------- Company
+R.company=()=>{const c=D.co;return`<div class="card"><h3>Company Settings (vendor details)</h3><div class="g"><div><label>Company name</label><input id="cn" value="${E(c.name)}"></div><div><label>Phone</label><input id="cp" value="${E(c.phone)}"></div><div><label>Email</label><input id="ce" value="${E(c.email)}"></div><div><label>GST no</label><input id="cg" value="${E(c.gst)}"></div></div><label>Address</label><textarea id="ca" rows="2">${E(c.addr)}</textarea>
+<div class="g" style="margin-top:12px"><div><label>Company logo</label><input type="file" accept="image/*" onchange="fl(this,'logo')">${c.logo?`<img src="${c.logo}" alt="" style="height:44px;margin-top:6px;display:block"><button class="b s" onclick="rmImg('logo')">Remove logo</button>`:`<small style="color:var(--mu)">No logo set</small>`}</div><div><label>Login background</label><input type="file" accept="image/*" onchange="fl(this,'bg')">${c.bg?`<img src="${c.bg}" alt="" style="height:44px;margin-top:6px;display:block"><button class="b s" onclick="rmImg('bg')">Remove background</button>`:`<small style="color:var(--mu)">No background set</small>`}</div></div>
+<button class="b" onclick="coSave()">Save</button><button class="b s" onclick="go('company')">Clear</button></div>`};
+function fl(el,k){const f=el.files[0];if(!f)return;const im=new Image();im.onload=()=>{const mx=k=="logo"?360:1100,r=Math.min(1,mx/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);c.getContext("2d").drawImage(im,0,0,c.width,c.height);const d=c.toDataURL(k=="logo"?"image/png":"image/jpeg",.75);if(d.length>230000){alert("Image is too large. Choose a smaller image.");return}D.co[k]=d;alert("Image loaded. Press Save.")};im.onerror=()=>alert("Could not read the image");im.src=URL.createObjectURL(f)}
+async function rmImg(k){if(!confirm("Remove this image?"))return;D.co[k]="";await save();brand();menu();go("company")}
+async function coSave(){Object.assign(D.co,{name:v("cn"),phone:v("cp"),email:v("ce"),gst:v("cg"),addr:v("ca")});await save();brand();menu();go("company")}
+function brand(){$("lc").textContent=D.co.name||"Sign in";$("login").style.backgroundImage=D.co.bg?`url(${D.co.bg})`:"none"}
+// ---------- Sales
+let rows=[{}],editNo="";
+R.sales=()=>`<div class="card"><h3>Sales <span id="eb" style="color:var(--pr);font-weight:400"></span></h3><div class="g"><div><label>Person name</label><input id="sp"></div><div><label>Mobile number</label><input id="sm" inputmode="tel"></div><div><label>Address</label><input id="sa"></div></div>
+<div class="tw"><table id="og"></table></div>
+<button class="b s" onclick="rows.push({});og()">+ Add row</button><div class="g" style="margin-top:12px"><div><label>Payment mode</label><select id="sx"><option>Cash</option><option>UPI</option></select></div><div><label>Total</label><input id="s1" readonly></div><div><label>Discount</label><input id="sd" type="number" min="0" value="0" oninput="og()"></div><div><label>Net amount</label><input id="s3" readonly></div></div>
+<button class="b" onclick="sSave()">Save</button><button class="b s" onclick="pr(cur0())">Print</button><button class="b s" onclick="sClear()">Clear</button></div>
+<div class="card"><h3>Saved bills</h3><div class="g"><div><label>Person name or mobile number</label><input id="bq" value="${E(sbQ)}" placeholder="Type name or mobile" onkeydown="if(event.key=='Enter')sbRun()"></div><div><label>Date</label><input type="date" id="bd" value="${sbD}"></div></div><button class="b" onclick="sbRun()">Search</button><button class="b s" onclick="sbClr()">Clear</button></div><div class="card tw" id="sbr">${sbHtml()}</div>`;
+let sbShow=false,sbQ="",sbD="";
+function sbHtml(){if(!sbShow)return'<p style="color:var(--mu);margin:0">Enter a person name, mobile number or date and press Search. Press Search with empty fields to list all saved bills.</p>';
+const q=L(sbQ),l=D.sales.filter(s=>(!q||L(s.person||"").includes(q)||L(s.mobile||"").includes(q))&&(!sbD||ymd(s)==sbD)).reverse();
+if(!l.length)return'<p style="margin:0">No saved bills found.</p>';
+return`<table><tr><th>Invoice</th><th>Date</th><th>Time</th><th>Person</th><th>Mobile</th><th>Payment</th><th>Total</th><th></th></tr>${l.map(s=>`<tr><td>${s.no}</td><td>${s.date}</td><td>${s.time}</td><td>${E(s.person)}</td><td>${E(s.mobile)}</td><td>${E(s.pay||"Cash")}</td><td>${s.total}</td><td><button class="b s" onclick="sEdit('${s.no}')">Update</button><button class="b s" onclick="pr(D.sales.find(x=>x.no=='${s.no}'))">Print</button></td></tr>`).join("")}</table>`}
+function sbRun(){sbQ=v("bq");sbD=v("bd");sbShow=true;$("sbr").innerHTML=sbHtml()}
+function sbClr(){sbShow=false;sbQ=sbD="";$("bq").value="";$("bd").value="";$("sbr").innerHTML=sbHtml()}
+let pkI=-1;
+function pkOpen(i){pkI=i;let b=$("pkm");if(!b){b=document.createElement("div");b.id="pkm";document.body.appendChild(b)}
+b.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:12px";
+b.innerHTML=`<div style="background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;width:100%;max-width:560px;max-height:85%;display:flex;flex-direction:column;padding:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0">Select item</h3><button class="b s" onclick="pkClose()">Close</button></div><input id="pks" placeholder="Search item name or model" oninput="pkList()" autocomplete="off"><div id="pkl" style="overflow:auto;margin-top:8px"></div></div>`;pkList();$("pks").focus()}
+function pkList(){const q=L($("pks").value);let h="";D.items.forEach((x,i)=>{if(x.on&&(!q||L(lb(x)).includes(q)))h+=`<div onclick="pkPick(${i})" style="padding:9px 10px;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;justify-content:space-between;gap:10px"><span>${E(x.name)} <small style="color:var(--mu)">${E(x.model)}</small></span><b>₹${m(x.mrp)}</b></div>`});
+$("pkl").innerHTML=h||'<p style="color:var(--mu)">No items found in Item Master.</p>'}
+function pkPick(i){const x=D.items[i];if(!x||pkI<0)return;rows[pkI]={item:x.name,model:x.model,rate:x.rate,price:x.mrp,qty:rows[pkI].qty||1};pkClose();og()}
+function pkClose(){const b=$("pkm");if(b)b.remove()}
+I.sales=()=>{rows=[{}];editNo="";og()};
+function og(){const g=$("og");if(!g)return;const ro=x=>`<td><input readonly value="${E(x??"")}"></td>`;g.innerHTML=`<tr><th>Sl</th><th>Item name</th><th>Model</th><th>Qty</th><th>MRP</th><th>Total</th><th></th></tr>`+rows.map((r,i)=>`<tr><td>${i+1}</td><td style="min-width:150px"><input readonly style="cursor:pointer" value="${E(r.item||"")}" placeholder="🔍 Click to search item" onclick="pkOpen(${i})"></td>${ro(r.model)}<td><input type="number" min="1" value="${r.qty||1}" onchange="rows[${i}].qty=Math.max(1,+this.value||1);og()"></td>${ro(r.price||0)}${ro((r.price||0)*(r.qty||1))}<td><button class="b s" onclick="rows.splice(${i},1);if(!rows.length)rows=[{}];og()">x</button></td></tr>`).join("");
+const t=tot();$("s1").value=t.sub;$("s3").value=t.total}
+const lb=x=>[x.name,x.model].filter(Boolean).join(" | ");
+function pkSel(i,val){if(!val.trim()){rows[i]={qty:rows[i].qty};og();return}const on=D.items.filter(x=>x.on);let l=on.filter(x=>L(lb(x))==L(val));if(!l.length)l=on.filter(x=>L(x.name)==L(val));
+if(l.length!=1){alert(l.length?"This item has several models. Pick the exact one from the suggestions.":"Item not found in Item Master");rows[i]={qty:rows[i].qty};og();return}
+const x=l[0];rows[i]={item:x.name,model:x.model,rate:x.rate,price:x.mrp,qty:rows[i].qty||1};og()}
+function tot(rs=rows,d=+($("sd")?.value)||0){const sub=rs.reduce((a,r)=>a+(r.price||0)*(r.qty||1),0);return{sub,disc:d,total:Math.round((sub-d)*100)/100}}
+function cur0(){const rs=rows.filter(r=>r.item),t=tot(rs);return{no:"(unsaved)",date:new Date().toLocaleDateString("en-IN"),ymd:new Date().toLocaleDateString("en-CA"),time:new Date().toLocaleTimeString("en-IN"),person:v("sp"),mobile:v("sm"),addr:v("sa"),pay:v("sx"),rows:rs,...t}}
+async function sSave(){const n=cur0();if(!n.person||!n.rows.length){alert("Enter person name and at least one item");return}
+if(editNo){const i=D.sales.findIndex(x=>x.no==editNo),o=D.sales[i];D.sales[i]={...n,no:o.no,date:o.date,ymd:o.ymd||ymd(o),time:o.time,edited:new Date().toLocaleString("en-IN")};await save();alert("Invoice "+o.no+" updated");go("sales");return}
+n.no="MW-"+String(await getNo()).padStart(4,"0");D.sales.push(n);await save();alert("Saved. Invoice "+n.no);go("sales")}
+function sEdit(no){const x=D.sales.find(y=>y.no==no);if(!x)return;editNo=no;$("sp").value=x.person;$("sm").value=x.mobile;$("sa").value=x.addr;$("sx").value=x.pay||"Cash";$("sd").value=x.disc||0;rows=JSON.parse(JSON.stringify(x.rows));og();$("eb").textContent="- editing invoice "+no+" (press Save to update, Clear to cancel)";scrollTo(0,0)}
+function sClear(){go("sales")}
+function words(n){n=Math.round(n);const a="One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen".split(" "),b=" , ,Twenty,Thirty,Forty,Fifty,Sixty,Seventy,Eighty,Ninety".split(","),f=n=>n<20?a[n-1]||"":b[n/10|0].trim()+(n%10?" "+a[n%10-1]:""),g=n=>(n>99?a[(n/100|0)-1]+" Hundred"+(n%100?" ":""):"")+f(n%100);let s="";[[1e7,"Crore"],[1e5,"Lakh"],[1e3,"Thousand"]].forEach(([d,l])=>{if(n>=d){s+=g(n/d|0)+" "+l+" ";n%=d}});return(s+g(n)).trim()+" Only"}
+const m=n=>(+n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const sv=(p,c="#0d3b7a",z=34)=>`<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const IC={doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7M9 8h3"/>',cal:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',clk:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',usr:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h3l2.5 11h10L21 7H7"/>',shd:'<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/>',hd:'<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 2-3 2-6 2"/>'};
+function inv(s){const c=D.co,w=(c.name||"").toUpperCase().split(" "),lw=w.pop(),nh=E(w.join(" "))+(w.length?" ":"")+"<b>"+E(lw)+"</b>";
+return `<div class="inv v2"><div class="hd2"><div class="hl"><div><div class="nm2">${nh}</div><div class="tg">Mobiles Accessories | Service</div></div></div><div class="hr">${E(c.addr)}<br>${E(c.phone)}<br>${E(c.email)}${c.gst?"<br>GST: "+E(c.gst):""}</div></div>
+<div class="bn">SALES INVOICE</div>
+<div class="ir"><div>${sv(IC.doc)}<span><small>Invoice No.:</small><b>${s.no}</b></span></div><div>${sv(IC.cal)}<span><small>Date:</small><b>${s.date}</b></span></div><div>${sv(IC.clk)}<span><small>Time:</small><b>${s.time}</b></span></div></div>
+<div class="box"><h4><span class="ic">${sv(IC.usr,"#fff",22)}</span>Customer Details</h4><div class="kv"><span>Name</span><span>:</span><span>${E(s.person)}</span></div><div class="kv"><span>Phone</span><span>:</span><span>${E(s.mobile)}</span></div><div class="kv"><span>Address</span><span>:</span><span>${E(s.addr)}</span></div><div class="kv"><span>Payment Mode</span><span>:</span><span>${E(s.pay||"")}</span></div></div>
+<div class="pi">${sv(IC.cart,"#fff",26)}Purchased Items</div>
+<table class="pt"><tr><th>No.</th><th>Product Details</th><th>Qty</th><th>Unit Price (₹)</th><th>Total (₹)</th></tr>${s.rows.map((r,i)=>{const x=r.det&&!r.model?r.det:"";return`<tr><td class="c">${i+1}</td><td>${E(r.item+(r.model?" "+r.model:""))}${x?`<br>${r.det&&!r.model?"":"("}${E(x)}${r.det&&!r.model?"":")"}`:""}</td><td class="c">${r.qty}</td><td class="r">${m(r.price)}</td><td class="r">${m(r.price*r.qty)}</td></tr>`}).join("")}</table>
+<div class="t2"><div>Sub Total:<span>₹${m(s.sub)}</span></div><div>Discount:<span>₹${m(s.disc)}</span></div>${s.gst?`<div>GST (18%):<span>₹${m(s.gst)}</span></div>`:""}<div class="gt">Total Amount:<span>₹${m(s.total)}</span></div></div>
+<div class="aw"><span class="ic">₹</span><div><b>Amount in Words:</b><span class="w">${words(s.total).replace(/ Only$/," Rupees Only")}</span></div></div>
+<div class="fs"><div>${sv(IC.shd,"#0d3b7a",36)}<span>100% Original<br>Products</span></div><div>${sv(IC.tag,"#0d3b7a",36)}<span>Best Price<br>Guarantee</span></div><div>${sv(IC.hd,"#0d3b7a",36)}<span>Dedicated<br>Support</span></div></div>
+</div>`}
+function pr(s){$("pa").innerHTML=inv(s);print()}
+async function saveFile(name,data){try{const d=window.claude&&await window.claude.use("downloads");if(d){await d.save({filename:name,data});return true}}catch(e){return false}
+const a=document.createElement("a");a.href=URL.createObjectURL(data);a.download=name;a.click();return true}
+// ---------- Report
+R.report=()=>{const S=fs(),net=S.reduce((a,x)=>a+x.total,0),rr=rep(),mg=mgn(S);return`<div class="card"><h3>Sales Report</h3><div class="g"><div><label>From date</label><input type="date" id="rf" value="${rf}" onchange="rf=this.value;go('report')"></div><div><label>To date</label><input type="date" id="rt" value="${rt}" onchange="rt=this.value;go('report')"></div></div>
+<button class="b s" onclick="rf=rt=new Date().toLocaleDateString('en-CA');go('report')">Today</button><button class="b s" onclick="rf=rt='';go('report')">All dates</button><button class="b" onclick="print0()">Print</button><button class="b s" onclick="dl()">Excel download</button>
+<p style="margin:10px 0 0"><b>${S.length}</b> bills &nbsp; Net sales <b>₹${m(net)}</b> &nbsp; Margin <b>₹${m(mg)}</b> &nbsp; <span style="color:var(--mu)">${rf||rt?(fd(rf)||"start")+" to "+(fd(rt)||"today"):"All dates"}</span></p></div>
+<div class="card tw"><table><tr><th>Invoice</th><th>Sales date</th><th>Item</th><th>Details</th><th>Person</th><th>Mobile</th><th>Address</th><th>Payment</th><th>Rate</th><th>MRP</th><th>Qty</th><th>Total</th></tr>${rr.map(r=>`<tr><td>${r["Invoice No"]}</td><td>${r["Sales Date"]}</td><td>${E(r.Item)}</td><td>${E(r.Details)}</td><td>${E(r.Person)}</td><td>${E(r.Mobile)}</td><td>${E(r.Address)}</td><td>${E(r.Payment)}</td><td>${m(r.Rate)}</td><td>${m(r.MRP)}</td><td>${r.Qty}</td><td>${m(r.Total)}</td></tr>`).join("")||`<tr><td colspan="12">No sales for the selected dates</td></tr>`}</table></div>`};
+function print0(){const c=D.co,d=new Date(),S=fs(),rr=rep(),pw={},pm={["Cash"]:{a:0,g:0,d:0},["UPI"]:{a:0,g:0,d:0}};
+S.forEach(x=>{x.rows.forEach(r=>{const k=r.item+(det(r)?" ("+det(r)+")":"");pw[k]=pw[k]||{q:0,a:0};pw[k].q+=r.qty;pw[k].a+=r.price*r.qty});const k=x.pay||"Cash";pm[k]=pm[k]||{a:0,g:0,d:0};pm[k].a+=x.total;pm[k].d+=+x.disc||0;pm[k].g+=x.sub!=null?x.sub:x.total+(+x.disc||0)});
+const net=S.reduce((a,x)=>a+x.total,0),qty=S.reduce((a,x)=>a+x.rows.reduce((b,r)=>b+r.qty,0),0),mg=mgn(S),per=rf||rt?(fd(rf)||"start")+" to "+(fd(rt)||"today"):"All dates";
+const pay=Object.entries(pm).map(([k,v])=>`<tr><td>${E(k)}</td><td class="r">₹${m(v.g)}</td><td class="r">₹${m(v.d)}</td><td class="r">₹${m(v.a)}</td></tr>`).join("");
+$("pa").innerHTML=`<div class="inv"><div class="top"><div style="display:flex;align-items:center;gap:12px">${c.logo?`<img src="${c.logo}" style="max-height:60px;max-width:90px;object-fit:contain">`:""}<div><div class="nm">${E((c.name||"").toUpperCase())}</div><div>${E(c.addr)}<br>${E(c.phone)}</div></div></div><div style="text-align:right;line-height:1.6"><h1>SALES REPORT</h1>Report Date: ${d.toLocaleDateString("en-IN")}<br>Period: ${per}<br>Prepared By: ${E(me.u)}</div></div>
+<div class="tiles"><div class="tile">NET SALES<b>₹${m(net)}</b></div><div class="tile">BILLS ISSUED<b>${S.length}</b></div><div class="tile">ITEMS SOLD<b>${qty}</b></div><div class="tile">TOTAL MARGIN<b>₹${m(mg)}</b></div></div>
+<h3>1. Product-wise Sales</h3><table><tr><th>S.No.</th><th>Product</th><th class="c">Qty</th><th class="r">Sales Amount</th></tr>${Object.entries(pw).map(([k,v],i)=>`<tr><td>${i+1}</td><td>${E(k)}</td><td class="c">${v.q}</td><td class="r">₹${m(v.a)}</td></tr>`).join("")}<tr class="tot"><td></td><td>TOTAL</td><td class="c">${qty}</td><td class="r">₹${m(Object.values(pw).reduce((a,v)=>a+v.a,0))}</td></tr></table>
+<h3>2. Payment Method Summary</h3><div class="two"><div><table><tr><th>Payment Method</th><th class="r">Sales Amount</th><th class="r">Discount</th><th class="r">Net Amount</th></tr>${pay}<tr class="tot"><td>Total Collections</td><td class="r">₹${m(Object.values(pm).reduce((a,v)=>a+v.g,0))}</td><td class="r">₹${m(Object.values(pm).reduce((a,v)=>a+v.d,0))}</td><td class="r">₹${m(net)}</td></tr></table></div></div>
+<h3>3. Sales Details</h3><table><tr><th>Invoice</th><th>Sales date</th><th>Item</th><th>Details</th><th>Person</th><th>Mobile</th><th>Address</th><th>Payment</th><th class="r">Rate</th><th class="r">MRP</th><th class="c">Qty</th><th class="r">Total</th></tr>${rr.map(r=>`<tr><td>${r["Invoice No"]}</td><td>${r["Sales Date"]}</td><td>${E(r.Item)}</td><td>${E(r.Details)}</td><td>${E(r.Person)}</td><td>${E(r.Mobile)}</td><td>${E(r.Address)}</td><td>${E(r.Payment)}</td><td class="r">${m(r.Rate)}</td><td class="r">${m(r.MRP)}</td><td class="c">${r.Qty}</td><td class="r">${m(r.Total)}</td></tr>`).join("")}</table>
+<div class="sg"><span>Prepared By</span><span>Checked By</span><span>Owner / Manager Signature</span></div></div>`;print()}
+function dl(){const b=XLSX.utils.book_new();XLSX.utils.book_append_sheet(b,XLSX.utils.json_to_sheet(rep().map(({Margin,...r})=>r)),"Sales Report");saveFile("sales-report.xlsx",new Blob([XLSX.write(b,{bookType:"xlsx",type:"array"})]))}
+// ---------- Sales Dashboard
+let dsF=new Date().toLocaleDateString("en-CA"),dsT=dsF;
+function dsh(){const S=D.sales.filter(s=>{const d=ymd(s);return(!dsF||d>=dsF)&&(!dsT||d<=dsT)});let mrp=0,rate=0,disc=0;S.forEach(s=>{disc+=+s.disc||0;s.rows.forEach(x=>{const q=x.qty||1;mrp+=(x.price||0)*q;rate+=rateOf(x)*q})});const net=mrp-disc;return{n:S.length,mrp,disc,net,rate,mg:net-rate}}
+R.dash=()=>{const d=dsh(),bx=(t,v,s,c)=>`<div class="card" style="margin:0;border-left:5px solid ${c}"><div style="color:var(--mu);font-size:13px">${t}</div><div style="font-size:26px;font-weight:700;margin:6px 0">₹${m(v)}</div><div style="color:var(--mu);font-size:12px">${s}</div></div>`;
+return`<div class="card"><h3>Sales Dashboard</h3><div class="g"><div><label>From date</label><input type="date" id="ds1" value="${dsF}" onchange="dsF=this.value;go('dash')"></div><div><label>To date</label><input type="date" id="ds2" value="${dsT}" onchange="dsT=this.value;go('dash')"></div></div>
+<button class="b s" onclick="dsF=dsT=new Date().toLocaleDateString('en-CA');go('dash')">Today</button><button class="b s" onclick="dsF=dsT='';go('dash')">All dates</button>
+<p style="margin:10px 0 0"><b>${d.n}</b> bills &nbsp; <span style="color:var(--mu)">${dsF||dsT?(fd(dsF)||"start")+" to "+(fd(dsT)||"today"):"All dates"}</span></p></div>
+<div class="g" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${bx("1) Total MRP Sales",d.mrp,"Qty × MRP","#0b4ea2")}${bx("2) Total Discount Sales",d.disc,"Discount given on bills","#c0392b")}${bx("3) Total Net Sales",d.net,"MRP sales − Discount","#1e8e3e")}${bx("4) Total Rate Sales",d.rate,"Qty × Rate","#8e44ad")}${bx("5) Margin on Sales",d.mg,"Net sales − Rate sales","#e67e22")}</div>`};
+// ---------- Excel storage
+R.excel=()=>`<div class="card"><h3>Excel Storage</h3><p>Choose an Excel file once. It stays connected after you refresh or reopen the page, and every save or update is written into it automatically (Users, Items, Access, Sales, Company sheets).</p><button class="b" onclick="pickX()">${fh?"Change Excel file":"Select Excel file"}</button>${fh?`<button class="b s" onclick="allowX()">Allow access</button><button class="b s" onclick="offX()">Disconnect</button>`:""}<button class="b s" onclick="dlAll()">Download backup now</button><p id="xs" style="color:var(--mu)">${fh?"Connected: "+E(fh.name)+(xs?" - "+E(xs):""):"No file selected"}</p><p style="color:var(--mu);font-size:12px">Tip: on a computer, pick a file inside your Google Drive folder and Google Drive keeps it synced online. Choosing a file works in Chrome or Edge on a computer. Phones can't write to a chosen file, so use Download backup there.</p></div>`;
+async function pickX(){if(!window.showSaveFilePicker){alert("This browser cannot write to a chosen file. Use Chrome or Edge on a computer, or use Download backup.");return}
+try{fh=await showSaveFilePicker({suggestedName:"billing-data.xlsx",types:[{description:"Excel",accept:{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":[".xlsx"]}}]});try{await idbSet("excel",fh)}catch(e){}await sync();go("excel")}catch(e){if(e.name!="AbortError")alert("Could not open the file here: "+e.message)}}
+async function allowX(){if(await perm(true))await sync();go("excel")}
+async function offX(){if(!confirm("Disconnect this Excel file?"))return;fh=null;xs="";try{await idbSet("excel",null)}catch(e){}go("excel")}
+function dlAll(){saveFile("billing-data.xlsx",new Blob([wb()]))}
+// ---------- Reset
+R.reset=()=>`<div class="card"><h3>Reset Data</h3><p style="color:#c0392b"><b>Warning:</b> this permanently deletes all items, sales bills, form access, other users and company details on every device. Your own admin login stays. It cannot be undone, so download a backup first.</p><div class="g"><div><label>Your password</label><input id="rp" type="password" autocomplete="current-password"></div><div><label>Reason for deleting the data</label><input id="rr" placeholder="Why is the data being deleted?"></div></div><button class="b" style="background:#c0392b;color:#fff" onclick="doReset()">Reset all data</button><button class="b s" onclick="dlAll()">Download backup first</button><button class="b s" onclick="go('reset')">Clear</button></div>${(D.resetlog||[]).length?`<div class="card tw"><h3>Reset history</h3><table><tr><th>When</th><th>By</th><th>Reason</th></tr>${D.resetlog.slice().reverse().map(x=>`<tr><td>${E(x.at)}</td><td>${E(x.by)}</td><td>${E(x.why)}</td></tr>`).join("")}</table></div>`:""}`;
+async function doReset(){const why=v("rr").trim();if(L(v("rp"))!=L(me.p)){alert("Wrong password");return}if(why.length<5){alert("Enter a reason (at least 5 characters)");return}
+if(!confirm("Delete ALL data permanently? This cannot be undone."))return;
+const ad={...me};D.items=[];D.sales=[];D.access={};D.users=[ad];D.co={name:"My Company",addr:"",phone:"",gst:"",email:"",logo:"",bg:""};D.seq=1;D.resetlog=(D.resetlog||[]).concat([{at:new Date().toLocaleString("en-IN"),by:me.u,why}]);me=D.users[0];
+await save();if(DB){try{await DB.doc("app/seq").set({n:1})}catch(e){}}brand();menu();alert("All data has been deleted.");go("reset")}
+// ---------- Import
+R.imp=()=>`<div class="card"><h3>Import from Excel</h3><p>Choose the Excel file this app stored (sheets: Users, Items, Access, Sales, Company) or a backup from Excel Storage.</p><div class="g"><div><label>Excel file</label><input type="file" id="xf" accept=".xlsx,.xls"></div><div><label>Import mode</label><select id="xm"><option value="merge">Add / update (keep existing data)</option><option value="replace">Replace all existing data</option></select></div></div><button class="b" onclick="doImport()">Import</button><button class="b s" onclick="go('imp')">Clear</button><p id="xr" style="color:var(--mu)"></p></div>`;
+async function doImport(){const f=$("xf").files[0];if(!f){alert("Choose an Excel file first");return}const rp=v("xm")=="replace";if(rp&&!confirm("Replace ALL existing data with the data in this file?"))return;
+let w;try{w=XLSX.read(await f.arrayBuffer(),{type:"array"})}catch(e){alert("Could not read this file");return}
+const S=n=>w.Sheets[n]?XLSX.utils.sheet_to_json(w.Sheets[n],{defval:"",raw:false}):[],g=(r,...k)=>{for(const x of k)if(r[x]!==undefined&&r[x]!=="")return r[x];return""},n0=x=>+String(x).replace(/,/g,"")||0;
+const U=S("Users"),IT=S("Items"),A=S("Access"),SL=S("Sales"),C=S("Company");
+if(!U.length&&!IT.length&&!SL.length&&!C.length){alert("No data found. Expected sheets: Users, Items, Access, Sales, Company.");return}
+if(rp){D.items=[];D.sales=[];D.access={};D.users=D.users.filter(u=>L(u.u)==L(me.u))}
+const c={u:0,i:0,s:0};
+U.forEach(r=>{const u=String(g(r,"Username")).trim();if(!u)return;const pw=String(g(r,"Password")),role=L(g(r,"Role"))=="admin"?"admin":"user",on=L(g(r,"Active")||"yes")!="no",e=D.users.find(x=>L(x.u)==L(u));
+if(e){if(pw)e.p=pw;if(e!==D.users[0]&&L(e.u)!=L(me.u)){e.role=role;e.on=on}}else{D.users.push({u,p:pw||"1234",role,on});c.u++}});
+IT.forEach(r=>{const name=String(g(r,"Name")).trim();if(!name)return;const model=String(g(r,"Model")).trim(),pr=n0(g(r,"Price")),o={name,model,rate:g(r,"Rate")!==""?n0(g(r,"Rate")):pr,mrp:g(r,"MRP")!==""?n0(g(r,"MRP")):pr,on:L(g(r,"Active")||"active")!="inactive"},e=D.items.findIndex(x=>L(x.name)==L(name)&&L(x.model||"")==L(model));if(e<0){D.items.push(o);c.i++}else D.items[e]=o});
+A.forEach(r=>{const u=String(g(r,"Username")).trim();if(u)D.access[u]=String(g(r,"Forms")).split(",").map(x=>x.trim()).filter(k=>FORMS[k])});
+if(C[0]){const map={name:"Name",addr:"Address",phone:"Phone",gst:"GST",email:"Email"};for(const k in map){const x=g(C[0],map[k]);if(x!=="")D.co[k]=String(x)}}
+const bills={};SL.forEach(r=>{const no=String(g(r,"Invoice No")).trim();if(no)(bills[no]=bills[no]||[]).push(r)});
+Object.entries(bills).forEach(([no,rs])=>{if(D.sales.some(x=>x.no==no))return;const r0=rs[0],rw=rs.map(r=>{const x={item:String(g(r,"Item")),model:String(g(r,"Model","Details")),price:n0(g(r,"MRP","Price")),qty:n0(g(r,"Qty"))||1};if(g(r,"Rate")!=="")x.rate=n0(g(r,"Rate"));return x}),sub=rw.reduce((a,x)=>a+x.price*x.qty,0),disc=n0(g(r0,"Discount"));
+const o={no,date:String(g(r0,"Date","Sales Date")),time:String(g(r0,"Time")),person:String(g(r0,"Person")),mobile:String(g(r0,"Mobile")),addr:String(g(r0,"Address")),pay:String(g(r0,"Payment"))||"Cash",rows:rw,sub,disc,total:Math.round((sub-disc)*100)/100};o.ymd=ymd(o);D.sales.push(o);c.s++});
+D.seq=Math.max(D.seq,Math.max(0,...D.sales.map(x=>parseInt(String(x.no).slice(3))||0))+1);norm();await save();if(DB){try{await DB.doc("app/seq").set({n:D.seq})}catch(e){}}brand();menu();
+const t="Imported: "+c.u+" new users, "+c.i+" new items, "+c.s+" new bills. Existing items and users were updated. New users without a password in the file get password 1234.";$("xr").textContent=t;alert(t)}
+const ready=(async()=>{DB=null;
+if(!DB)return;
+const er=e=>{if(e&&e.code=="revoked")setSync("Access removed")};
+if(LOCAL){try{const m=await DB.doc("app/meta").get();if(!m.exists){last={};await doSave();await DB.doc("app/seq").set({n:D.seq||1});await DB.doc("app/meta").set({migrated:1})}}catch(e){}}
+const H={"app/users":d=>{D.users=d.list||D.users},"app/access":d=>{D.access=d.map||{}},"app/items":d=>{D.items=d.list||[];norm()},"app/resetlog":d=>{D.resetlog=d.list||[]},"app/co":d=>{Object.assign(D.co,d)},"app/logo":d=>{D.co.logo=d.d||""},"app/bg":d=>{D.co.bg=d.d||""},"app/seq":d=>{D.seq=d.n||1}};
+for(const k in H)DB.doc(k).onSnapshot(sn=>{if(sn.exists){H[k](sn.data());if(k!="app/seq")last[k]=J(parts()[k])}chg()},er);
+DB.collection("sales").onSnapshot(sn=>{if(sn.metadata.fromCache&&sn.empty)return;D.sales=sn.docs.map(d=>d.data()).sort((a,b)=>a.no<b.no?-1:1);Object.keys(last).forEach(k=>{if(k.startsWith("sales/"))delete last[k]});sn.docs.forEach(d=>{last["sales/"+d.id]=J(d.data())});chg()},er);
+setSync("Synced on all devices")})();
+brand();$("lp").addEventListener("keydown",e=>{if(e.key=="Enter")login()});
+</script></body></html>
